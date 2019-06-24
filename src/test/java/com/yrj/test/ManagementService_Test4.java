@@ -24,6 +24,7 @@ public class ManagementService_Test4 {
     @Autowired
     public ActivitiRule activitiRule ;
 
+
     @Test
     @Deployment(resources= {"test07.bpmn"})
     public void test01(){
