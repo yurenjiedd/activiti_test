@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-2.5.xsd">
+
+    <!--数据源-->
+    <!--<bean id="dataSource" class="com.alibaba.druid.pool.DruidDataSource">
+        <property name="driverClassName" value="com.mysql.jdbc.Driver"/>
+        <property name="url" value="jdbc:mysql://localhost:3306/activiti?useUnicode=true&amp;characterEncoding=utf8&amp;useSSL=false"/>
+        <property name="username" value="root"/>
+        <property name="password" value="yrj961129"/>
+    </bean>-->
+
+    <!--创建流程引擎对象-->
+    <bean id="processEngineConfiguration" class="org.activiti.engine.impl.cfg.StandaloneInMemProcessEngineConfiguration">
+        <!--<property name="dataSource" ref="dataSource"/>-->
+        <property name="jdbcDriver" value="com.mysql.jdbc.Driver" />
+        <property name="jdbcUrl" value="jdbc:mysql://localhost:3306/activiti?useUnicode=true&amp;characterEncoding=utf8&amp;useSSL=false" />
+        <property name="jdbcUsername" value="root" />
+        <property name="jdbcPassword" value="yrj961129" />
+        <property name="databaseSchemaUpdate" value="true"/>
+        <property name="databaseType" value="mysql" />
+
+        <!--设置节点上字体的样式（也就是不会乱码）-->
+        <property name="activityFontName" value="宋体" />
+        <!--设置连接线上字体的样式（也就是不会乱码）-->
+        <property name="labelFontName" value="宋体" />
+
+        <!--设置拦截器-->
+        <!--<property name="commandInvoker" ref="commandInvoker" />-->
+
+        <!--设置历史记录的级别-->
+        <property name="history" value="full"/>
+
+        <!--enableDatabaseEventLogging：是否开启工作的数据日志。（一般我都不开，系统日志够多了，呵呵）-->
+        <!--<property name="enableDatabaseEventLogging" value="true"/>-->
+
+        <!--绑定指定的监听器-->
+        <!--<property name="typedEventListeners">
+            <map>
+                <entry key="PROCESS_STARTED">
+                    <list>
+                        <bean class="com.yrj.event.MyActivitiEventListener"></bean>
+                    </list>
+                </entry>
+            </map>
+        </property>-->
+
+        <!--<property name="customPostCommandInterceptors">
+            <list>
+                <bean class="com.yrj.invoker.MyCommandInterceptor"/>
+            </list>
+        </property>-->
+
+        <!-- 打开异步线程执行器 （不定义线程池会默认线程池）-->
+        <!--<property name="asyncExecutorActivate" value="true"/>
+        &lt;!&ndash;自定义线程池&ndash;&gt;
+        <property name="asyncExecutor" ref="asyncExecutor" />
+        &lt;!&ndash;配置监听器监听定时任务&ndash;&gt;
+        <property name="eventListeners">
+            <list>
+                <bean class="com.yrj.event.MyJobEventListener"></bean>
+            </list>
+        </property>-->
+
+    </bean>
+
+    <bean id="asyncExecutor"  class="org.activiti.engine.impl.asyncexecutor.DefaultAsyncJobExecutor">
+        <!--需要执行的服务-->
+        <property name="executorService" ref="executorService"/>
+    </bean>
+    <bean id="executorService" class="org.springframework.scheduling.concurrent.ThreadPoolExecutorFactoryBean">
+        <!--配置线程属性-->
+        <!-- 1.配置线程前缀-->
+        <property name="threadNamePrefix" value="activiti-job-"/>
+        <!--2.配置核心线程数-->
+        <property name="corePoolSize" value="5"/>
+        <!--配置最大线程数-->
+        <property name="maxPoolSize" value="20"/>
+        <!--队列长度-->
+        <property name="queueCapacity" value="100"/>
+        <!--当线程都满了拒绝策瑞-->
+        <property name="rejectedExecutionHandler">
+            <!-- 默认的策略-->
+            <bean class="java.util.concurrent.ThreadPoolExecutor$AbortPolicy"/>
+
+        </property>
+    </bean>
+
+    <bean id="commandInvoker" class="com.yrj.invoker.MyMDCCommandInvoker" />
+
+</beans>
